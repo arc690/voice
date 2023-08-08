@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Speech-to-Text App - OpenAI Style</title>
+    <style>
+        body {
+            font-family: 'Open Sans', Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            margin-top: 40px;
+        }
+        
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+            background-image: linear-gradient(to bottom right, #1CBE83, #36bfa3);
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+      
+        .logo-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #1CBE83;
+        }
+    
+        button {
+            padding: 14px 28px;
+            font-size: 18px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #fff;
+            background-color: #1CBE83;
+            margin: 10px;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    
+        #startButton:hover {
+            background-color: #16a774;
+        }
+    
+        #stopButton {
+            background-color: #ccc;
+        }
+    
+        #stopButton:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    
+        #output {
+            margin-top: 40px;
+            font-size: 24px;
+        }
+        
+        .quickstart-section {
+            font-family: 'Open Sans', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            margin-top: 40px;
+        }
+    
+        .section-heading {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1CBE83;
+        }
+    
+        .section-content {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+    
+        .code-block {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    
+        .example-list {
+            list-style: none;
+            padding-left: 0;
+        }
+    
+        .example-item {
+            margin-bottom: 10px;
+        }
+    
+        .example-item button {
+            background-color: #1CBE83;
+            margin: 5px;
+            font-size: 16px;
+            padding: 8px 16px;
+            border-radius: 4px;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+    
+        .example-item button:hover {
+            background-color: #16a774;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <img src="logo.png" alt="OpenAI Logo">
+    </div>
+    <h1>Speech-to-Text App</h1>
+    <button id="startButton">Start Recording</button>
+    <button id="stopButton" disabled>Stop Recording</button>
+    <p id="output"></p>
+    
+    <div class="app-container">
+        <div class="quickstart-section">
+            <div class="section-heading">Quickstart</div>
+            <div class="section-content">
+                Welcome to the Speech-to-Text App quickstart tutorial! In this tutorial, you'll build a simple application that converts speech into text using OpenAI's language models.
+            </div>
+        
+            <div class="section-heading">Introduction</div>
+            <div class="section-content">
+                OpenAI has trained cutting-edge language models that are very good at understanding and generating text. Our API provides access to these models and can be used to solve virtually any task that involves processing language. Whether it's content generation, summarization, classification, translation, or more, the possibilities are vast!
+            </div>
+        
+            <!-- Add more sections with content here -->
+        
+            <div class="section-heading">1. Start with an Instruction</div>
+            <div class="section-content">
+                To create a pet name generator, you need a clear prompt. Let's begin with a simple instruction: "Suggest one name for a horse." Submit this prompt to generate your first completion.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const output = document.getElementById('output');
+        let recognition;
+
+        // Check if the browser supports the Web Speech API
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true; // Continuous recognition
+            recognition.interimResults = true; // Get interim results as the user speaks
+
+            recognition.onstart = function () {
+                output.innerHTML = 'Listening...';
+                startButton.disabled = true;
+                stopButton.disabled = false;
+            };
+
+            recognition.onerror = function (event) {
+                output.innerHTML = 'Error occurred in recognition: ' + event.error;
+            };
+
+            recognition.onend = function () {
+                output.innerHTML = 'Stopped listening.';
+                startButton.disabled = false;
+                stopButton.disabled = true;
+            };
+
+            recognition.onresult = function (event) {
+                const transcript = event.results[event.results.length - 1][0].transcript;
+                output.innerHTML = 'You said: ' + transcript;
+            };
+        } else {
+            output.innerHTML = 'Your browser does not support the Web Speech API. Please use a different browser.';
+        }
+
+        startButton.addEventListener('click', function () {
+            recognition.start();
+        });
+
+        stopButton.addEventListener('click', function () {
+            recognition.stop();
+        });
+    </script>
+</body>
+</html>
